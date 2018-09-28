@@ -1,18 +1,18 @@
 package ua.rudolf.telega.menu.bottom
 
-import org.telegram.telegrambots.api.methods.BotApiMethod
 import org.telegram.telegrambots.api.objects.Location
 import org.telegram.telegrambots.api.objects.Message
 import org.telegram.telegrambots.api.objects.Update
 import org.telegram.telegrambots.bots.AbsSender
-import ua.rudolf.telega.menu.ActionWithCallback
-import ua.rudolf.telega.menu.DefaultMessageSentCallback
-import ua.rudolf.telega.menu.extractMessage
-import java.io.Serializable
+import ua.rudolf.telega.DefaultMessageSentCallback
+import ua.rudolf.telega.extractMessage
+import ua.rudolf.telega.menu.TelegramCommand
+import ua.rudolf.telega.menu.keyboard
 
-fun <T> MenuPoint<T>.sendToUser(user: T, chatId: Long, f: (MenuPoint<T>) -> Unit, editMessage: Int? = null): ActionWithCallback<Serializable> {
-    return ActionWithCallback<Serializable>(
-            this.createMessage(user, chatId) as BotApiMethod<Serializable>,
+fun <T> MenuPoint<T>.sendToUser(user: T, chatId: Long, f: (MenuPoint<T>) -> Unit, editMessage: Int? = null): List<TelegramCommand> {
+    return keyboard(
+            chatId,
+            this.inlineKeyboardMarkup(user),
             DefaultMessageSentCallback(handleResult = { _, message ->
                 println("Execute $message")
                 f(this@sendToUser)
@@ -29,18 +29,18 @@ class Menu<T>(
     val bottomKeyboard = MenuPoint<T>(null, id = "", generator = menuGenerator)
     val sessions = HashMap<Long, Session<T>>()
 
-    val locationHandlers = HashSet<(user: T, message: Message, location: Location, result: MutableList<ActionWithCallback<out Serializable>>) -> Unit>()
+    val locationHandlers = HashSet<(user: T, message: Message, location: Location, result: MutableList<TelegramCommand>) -> Unit>()
 
-    fun process(update: Update): List<ActionWithCallback<out Serializable>> {
+    fun process(update: Update): List<TelegramCommand> {
         val message = update.extractMessage()
         val session = sessions.getOrPut(message.chatId, { Session(userSessionProvider.invoke(update), this) })
         if (session.currentMenu == null) {
-            return listOf(bottomKeyboard.sendToUser(session.userSession, message.chatId, { v -> session.currentMenu = v }))
+            return bottomKeyboard.sendToUser(session.userSession, message.chatId, { v -> session.currentMenu = v })
         }
         return session.process(update)
     }
 
-    fun locationHandler(function: (user: T, message: Message, location: Location, result: MutableList<ActionWithCallback<out Serializable>>) -> Unit) {
+    fun locationHandler(function: (user: T, message: Message, location: Location, result: MutableList<TelegramCommand>) -> Unit) {
         locationHandlers.add(function)
     }
 
