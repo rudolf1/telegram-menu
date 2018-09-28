@@ -1,11 +1,9 @@
 package ua.rudolf.telega.menu.bottom
 
-import org.telegram.telegrambots.api.methods.send.SendMessage
-import org.telegram.telegrambots.api.objects.Message
 import org.telegram.telegrambots.api.objects.Update
-import ua.rudolf.telega.menu.ActionWithCallback
-import ua.rudolf.telega.menu.extractMessage
-import java.io.Serializable
+import ua.rudolf.tracking.extractMessage
+import ua.rudolf.tracking.menu.TelegramCommand
+import ua.rudolf.tracking.menu.textMessage
 
 class Session<T>(val userSession: T, val menu: Menu<T>) {
 
@@ -13,9 +11,9 @@ class Session<T>(val userSession: T, val menu: Menu<T>) {
     var awaitingTextReply: String? = null
 
 
-    fun process(update: Update): List<ActionWithCallback<out Serializable>> {
+    fun process(update: Update): List<TelegramCommand> {
         val message = update.extractMessage()
-        val result = ArrayList<ActionWithCallback<out Serializable>>()
+        val result = ArrayList<TelegramCommand>()
 
         when {
             message.location != null -> {
@@ -23,16 +21,16 @@ class Session<T>(val userSession: T, val menu: Menu<T>) {
             }
             message.hasText() -> {
                 val incomingText = message.text
-                val menuContent = (currentMenu?:menu.bottomKeyboard).createContent(userSession)
+                val menuContent = (currentMenu ?: menu.bottomKeyboard).createContent(userSession)
                 menuContent.menus.get(incomingText)?.apply {
-                    result.add(this.sendToUser(userSession, message.chatId, { v -> currentMenu = v }, editMessage = message.messageId))
+                    result.addAll(this.sendToUser(userSession, message.chatId, { v -> currentMenu = v }, editMessage = message.messageId))
                 }
 
                 menuContent.actions.get(incomingText)?.apply {
                     result.addAll(this.invoke(userSession))
                     val parent = currentMenu?.parent
-                    if(parent != null) {
-                        result.add(parent.sendToUser(userSession, message.chatId, { v -> currentMenu = v }, editMessage = message.messageId))
+                    if (parent != null) {
+                        result.addAll(parent.sendToUser(userSession, message.chatId, { v -> currentMenu = v }, editMessage = message.messageId))
                     }
                 }
 
@@ -43,7 +41,7 @@ class Session<T>(val userSession: T, val menu: Menu<T>) {
             }
         }
         if (result.isEmpty()) {
-            result.add(ActionWithCallback<Message>(SendMessage(message.chatId, "Incorrect message, Please use menu.")))
+            result.addAll(textMessage(message.chatId, "Incorrect message, Please use menu."))
         }
         return result
     }
