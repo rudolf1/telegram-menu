@@ -3,8 +3,8 @@ package ua.rudolf.telega.menu.bottom
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow
-import ua.rudolf.tracking.menu.TelegramCommand
-import ua.rudolf.tracking.menu.MutableProperty
+import ua.rudolf.telega.menu.TelegramCommand
+import ua.rudolf.telega.menu.MutableProperty
 import kotlin.reflect.KMutableProperty0
 
 typealias Generator<T> = (user: T, menuPoint: TmpMenu<T>) -> Unit

@@ -4,10 +4,10 @@ import org.telegram.telegrambots.api.objects.Location
 import org.telegram.telegrambots.api.objects.Message
 import org.telegram.telegrambots.api.objects.Update
 import org.telegram.telegrambots.bots.AbsSender
-import ua.rudolf.tracking.DefaultMessageSentCallback
-import ua.rudolf.tracking.extractMessage
-import ua.rudolf.tracking.menu.TelegramCommand
-import ua.rudolf.tracking.menu.keyboard
+import ua.rudolf.telega.DefaultMessageSentCallback
+import ua.rudolf.telega.extractMessage
+import ua.rudolf.telega.menu.TelegramCommand
+import ua.rudolf.telega.menu.keyboard
 
 fun <T> MenuPoint<T>.sendToUser(user: T, chatId: Long, f: (MenuPoint<T>) -> Unit, editMessage: Int? = null): List<TelegramCommand> {
     return keyboard(

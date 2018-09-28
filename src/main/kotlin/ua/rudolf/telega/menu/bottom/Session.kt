@@ -1,9 +1,9 @@
 package ua.rudolf.telega.menu.bottom
 
 import org.telegram.telegrambots.api.objects.Update
-import ua.rudolf.tracking.extractMessage
-import ua.rudolf.tracking.menu.TelegramCommand
-import ua.rudolf.tracking.menu.textMessage
+import ua.rudolf.telega.extractMessage
+import ua.rudolf.telega.menu.TelegramCommand
+import ua.rudolf.telega.menu.textMessage
 
 class Session<T>(val userSession: T, val menu: Menu<T>) {
 
