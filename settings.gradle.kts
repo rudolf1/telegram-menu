@@ -1,2 +1,2 @@
-rootProject.name = "telega-menu"
+rootProject.name = "telegram-menu"
 
