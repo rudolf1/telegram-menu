@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "1.2.61"
+    `maven-publish`    
 }
 group = "ua.rudolf.telega"
 version = "1.0"
@@ -7,6 +8,7 @@ repositories {
     mavenCentral()
     jcenter()
 }
+
 dependencies {
     compile ("org.telegram:telegrambots:3.6.1")
     compile ("org.apache.logging.log4j:log4j-api:2.5")
@@ -20,4 +22,8 @@ dependencies {
 
 }
 
-
+publishing {
+    repositories {
+        maven(url = "build/repository")
+    }
+}
