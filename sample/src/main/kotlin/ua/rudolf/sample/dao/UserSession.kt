@@ -5,7 +5,8 @@ enum class UserState {
     READY,
     TERMINATED
 }
+
 class UserSession(val chatId: Long) {
-    var lastLocation:Location? = null
+    var lastLocation: Location? = null
     var state: UserState = UserState.NEW
 }
