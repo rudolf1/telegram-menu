@@ -33,13 +33,15 @@ class TelegramBot(config: TelegramBotConfig) {
                                 }
                             }
                         }
-                        .menu("Show last location") { menuUser, _ ->
+                        .action("Show last location") { menuUser ->
                             val loc = menuUser.lastLocation
                             if (loc != null) {
                                 locationMessage(menuUser.chatId, loc.longitude, loc.latitude)
                             } else {
-                                textMessage(menuUser.chatId, "Last location not defined")
-                                documentMessage(menuUser.chatId, "read_it.txt", "Hi Looser".toByteArray())
+                                textMessage(menuUser.chatId, "Last location not defined").plus(
+                                    documentMessage(menuUser.chatId, "read_it.txt", "Hi Looser".toByteArray())
+                                )
+
                             }
                         }
             }
