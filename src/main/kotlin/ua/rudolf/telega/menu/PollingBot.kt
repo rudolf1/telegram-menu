@@ -10,6 +10,7 @@ import kotlin.reflect.KFunction1
 
 data class TelegramBotConfig(
         val telegramBotToken: String,
+        val telegramBotUrl: String? = null,
         val telegramProxy: TelegramBotProxyConfig? = null
 )
 
@@ -31,6 +32,9 @@ class PollingBot(
         this.credentialsProvider = BasicCredentialsProvider().also { crProvider ->
             crProvider.setCredentials(org.apache.http.auth.AuthScope.ANY, UsernamePasswordCredentials(it.username, it.password))
         }
+    }
+    config.telegramBotUrl?.let {
+        this.baseUrl = it
     }
 }) {
 
