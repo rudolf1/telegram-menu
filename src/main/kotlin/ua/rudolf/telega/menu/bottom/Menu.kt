@@ -5,12 +5,10 @@ import org.telegram.telegrambots.api.objects.Message
 import org.telegram.telegrambots.api.objects.Update
 import org.telegram.telegrambots.bots.AbsSender
 import ua.rudolf.telega.menu.DefaultMessageSentCallback
-import ua.rudolf.telega.menu.TelegramCommand
 import ua.rudolf.telega.menu.extractMessage
-import ua.rudolf.telega.menu.keyboard
 
 fun <T> MenuPoint<T>.sendToUser(user: T, chatId: Long, f: (MenuPoint<T>) -> Unit, editMessage: Int? = null): List<TelegramCommand> {
-    return keyboard(
+    return keyboardInternal(
             chatId,
             this.inlineKeyboardMarkup(user),
             DefaultMessageSentCallback(handleResult = { _, message ->
@@ -23,13 +21,12 @@ fun <T> MenuPoint<T>.sendToUser(user: T, chatId: Long, f: (MenuPoint<T>) -> Unit
 class Menu<T>(
         val bot: AbsSender,
         val userSessionProvider: (update: Update) -> T,
+        val locationHandler: Actionable<T>.(message: Message, location: Location) -> Unit = { message: Message, location: Location -> },
         menuGenerator: Generator<T>
 ) {
 
     val bottomKeyboard = MenuPoint<T>(null, id = "", generator = menuGenerator)
     val sessions = HashMap<Long, Session<T>>()
-
-    val locationHandlers = HashSet<(user: T, message: Message, location: Location, result: MutableList<TelegramCommand>) -> Unit>()
 
     fun process(update: Update): List<TelegramCommand> {
         val message = update.extractMessage()
@@ -39,10 +36,4 @@ class Menu<T>(
         }
         return session.process(update)
     }
-
-    fun locationHandler(function: (user: T, message: Message, location: Location, result: MutableList<TelegramCommand>) -> Unit) {
-        locationHandlers.add(function)
-    }
-
-
 }

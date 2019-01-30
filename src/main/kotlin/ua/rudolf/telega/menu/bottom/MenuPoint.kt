@@ -3,19 +3,25 @@ package ua.rudolf.telega.menu.bottom
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow
-import ua.rudolf.telega.menu.TelegramCommand
 import ua.rudolf.telega.menu.MutableProperty
 import kotlin.reflect.KMutableProperty0
 
-typealias Generator<T> = (user: T, menuPoint: TmpMenu<T>) -> Unit
+typealias Generator<T> = TmpMenu<T>.() -> Unit
+typealias ActionableGenerator<T> = Actionable<T>.() -> Unit
 
-class TmpMenu<T>(val origin: MenuPoint<T>, user: T) {
+interface Actionable<T> {
+    fun act(command: TelegramCommand)
+    val user: T
+}
+
+class TmpMenu<T>(val origin: MenuPoint<T>, val user: T) {
+    // TODO Make it private
     val properties = HashMap<String, (user: T) -> MutableProperty<in String>>()
-    val actions = HashMap<String?, (user: T) -> List<TelegramCommand>>()
+    val actions = HashMap<String?, ActionableGenerator<T>>()
     val menus = LinkedHashMap<String, MenuPoint<T>>()
 
     init {
-        origin.generator.invoke(user, this)
+        this.apply(origin.generator)
         if (origin.parent != null) {
             val text = "Back"
             menus.put(mapKey(text), origin.parent)
@@ -27,26 +33,24 @@ class TmpMenu<T>(val origin: MenuPoint<T>, user: T) {
     //    private fun mapKey(text: String): String = "${hash(text).invisibleHash()}$text"
     private fun mapKey(text: String): String = text
 
-    fun menu(text: String, f: Generator<T>): TmpMenu<T> {
-
+    fun menu(text: String, f: Generator<T>) {
         menus.put(mapKey(text), MenuPoint(origin, id = hash(text), generator = f))
-        return this
     }
 
-    fun addParamKotlin(text: String, param: (user: T) -> KMutableProperty0<in String>): TmpMenu<T> {
+    fun addParamKotlin(text: String, param: (user: T) -> KMutableProperty0<in String>) {
         properties.put(mapKey(text), { user -> MutableProperty.create(param.invoke(user)) })
-        return this
     }
 
-    fun addParam(text: String, param: (user: T) -> MutableProperty<in String>): TmpMenu<T> {
+    fun addParam(text: String, param: (user: T) -> MutableProperty<in String>) {
         properties.put(mapKey(text), param::invoke)
-        return this
     }
 
-    fun action(text: String, f: (user: T) -> List<TelegramCommand>): TmpMenu<T> {
+    fun action(text: String, f: ActionableGenerator<T>) {
         actions.put(mapKey(text), f)
-        return this
     }
+
+    fun getButtons() = menus.keys.plus(actions.keys).plus(properties.keys)
+
 }
 
 
@@ -66,7 +70,7 @@ class MenuPoint<T>(
             this.oneTimeKeyboard = false
             this.selective = true
 
-            tmpMenu.menus.keys.plus(tmpMenu.actions.keys).plus(tmpMenu.properties.keys).forEach {
+            tmpMenu.getButtons().forEach {
                 keyboard.add(KeyboardRow().apply {
                     add(KeyboardButton(it))
                 })

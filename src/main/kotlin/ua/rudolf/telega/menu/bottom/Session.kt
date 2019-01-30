@@ -1,9 +1,7 @@
 package ua.rudolf.telega.menu.bottom
 
 import org.telegram.telegrambots.api.objects.Update
-import ua.rudolf.telega.menu.TelegramCommand
 import ua.rudolf.telega.menu.extractMessage
-import ua.rudolf.telega.menu.textMessage
 
 class Session<T>(val userSession: T, val menu: Menu<T>) {
 
@@ -13,11 +11,20 @@ class Session<T>(val userSession: T, val menu: Menu<T>) {
 
     fun process(update: Update): List<TelegramCommand> {
         val message = update.extractMessage()
+
         val result = ArrayList<TelegramCommand>()
+        val x: Actionable<T> = object : Actionable<T> {
+            override val user: T
+                get() = userSession
+
+            override fun act(command: TelegramCommand) {
+                result.add(command)
+            }
+        }
 
         when {
             message.location != null -> {
-                menu.locationHandlers.forEach { it.invoke(userSession, message, message.location, result) }
+                menu.locationHandler(x, message, message.location)
             }
             message.hasText() -> {
                 val incomingText = message.text
@@ -27,7 +34,7 @@ class Session<T>(val userSession: T, val menu: Menu<T>) {
                 }
 
                 menuContent.actions.get(incomingText)?.apply {
-                    result.addAll(this.invoke(userSession))
+                    this(x)
                     val parent = currentMenu?.parent
                     if (parent != null) {
                         result.addAll(parent.sendToUser(userSession, message.chatId, { v -> currentMenu = v }, editMessage = message.messageId))
@@ -41,7 +48,9 @@ class Session<T>(val userSession: T, val menu: Menu<T>) {
             }
         }
         if (result.isEmpty()) {
-            result.addAll(textMessage(message.chatId, "Incorrect message, Please use menu."))
+            with(x) {
+                textMessage(message.chatId, "Incorrect message, Please use menu.")
+            }
         }
         return result
     }
