@@ -4,7 +4,6 @@ plugins {
     `maven-publish`
 }
 group = "com.github.rudolf1"
-version = "1.0"
 repositories {
     mavenCentral()
     jcenter()

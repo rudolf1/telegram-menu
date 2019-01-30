@@ -11,9 +11,9 @@ import org.telegram.telegrambots.bots.AbsSender
 import org.telegram.telegrambots.updateshandlers.SentCallback
 import java.io.ByteArrayInputStream
 
-public fun none() = listOf<TelegramCommand>()
+fun none() = listOf<TelegramCommand>()
 
-public fun locationMessage(chatId: Long, longitude: Float, latitude: Float, callback: SentCallback<Message> = DefaultMessageSentCallback()): List<TelegramCommand> {
+fun locationMessage(chatId: Long, longitude: Float, latitude: Float, callback: SentCallback<Message> = DefaultMessageSentCallback()): List<TelegramCommand> {
     return listOf(ApiTelegramCommandAndCallback(SendLocation().apply {
         this.chatId = chatId.toString()
         this.longitude = longitude
@@ -21,13 +21,13 @@ public fun locationMessage(chatId: Long, longitude: Float, latitude: Float, call
     }, { b, c -> executeAsync(b, c) }, callback))
 }
 
-public fun textMessage(chatId: Long, text: String, callback: SentCallback<Message> = DefaultMessageSentCallback()) = textMessage(chatId.toString(), text, callback)
+fun textMessage(chatId: Long, text: String, callback: SentCallback<Message> = DefaultMessageSentCallback()) = textMessage(chatId.toString(), text, callback)
 
-public fun textMessage(chatId: String, text: String, callback: SentCallback<Message> = DefaultMessageSentCallback()): List<TelegramCommand> {
+fun textMessage(chatId: String, text: String, callback: SentCallback<Message> = DefaultMessageSentCallback()): List<TelegramCommand> {
     return listOf(ApiTelegramCommandAndCallback(SendMessage(chatId, text), { b, c -> executeAsync(b, c) }, callback))
 }
 
-public fun keyboard(chatId: Long, keyBoard: ReplyKeyboardMarkup, callback: SentCallback<Message> = DefaultMessageSentCallback()): List<TelegramCommand> {
+fun keyboard(chatId: Long, keyBoard: ReplyKeyboardMarkup, callback: SentCallback<Message> = DefaultMessageSentCallback()): List<TelegramCommand> {
     return listOf(ApiTelegramCommandAndCallback(SendMessage().also {
         it.text = "None"
         it.chatId = chatId.toString()
@@ -35,18 +35,18 @@ public fun keyboard(chatId: Long, keyBoard: ReplyKeyboardMarkup, callback: SentC
     }, { b, c -> executeAsync(b, c) }, callback))
 }
 
-public fun documentMessage(chatId: String, documentName: String, ba: ByteArray): List<TelegramCommand> {
+fun documentMessage(chatId: Long, documentName: String, ba: ByteArray): List<TelegramCommand> {
     return listOf(PartialApiTelegramCommandAndCallback<SendDocument>(SendDocument().apply {
-        this.chatId = chatId
+        this.chatId = chatId.toString()
         this.setNewDocument(documentName, ByteArrayInputStream(ba))
     }) { b -> sendDocument(b) })
 }
 
-public interface TelegramCommand {
+interface TelegramCommand {
     fun execute(sender: AbsSender)
 }
 
-public class ApiTelegramCommandAndCallback(
+class ApiTelegramCommandAndCallback(
         val method: BotApiMethod<Message>,
         val run: AbsSender.(BotApiMethod<Message>, SentCallback<Message>) -> Unit,
         val callback: SentCallback<Message> = DefaultMessageSentCallback()
@@ -57,7 +57,7 @@ public class ApiTelegramCommandAndCallback(
     }
 }
 
-public class PartialApiTelegramCommandAndCallback<T : PartialBotApiMethod<Message>>(
+class PartialApiTelegramCommandAndCallback<T : PartialBotApiMethod<Message>>(
         val method: T,
         val run: AbsSender.(T) -> Unit
 ) : TelegramCommand {
