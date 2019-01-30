@@ -12,22 +12,20 @@ import org.telegram.telegrambots.updateshandlers.SentCallback
 import ua.rudolf.telega.menu.DefaultMessageSentCallback
 import java.io.ByteArrayInputStream
 
-fun <T> Actionable<T>.locationMessage(chatId: Long, longitude: Float, latitude: Float, callback: SentCallback<Message> = DefaultMessageSentCallback()) {
+fun <T> Actionable<T>.locationMessage(longitude: Float, latitude: Float, callback: SentCallback<Message> = DefaultMessageSentCallback()) {
     this.act(ApiTelegramCommandAndCallback(SendLocation().apply {
-        this.chatId = chatId.toString()
+        this.chatId = this@locationMessage.session.chatId.toString()
         this.longitude = longitude
         this.latitude = latitude
     }, { b, c -> executeAsync(b, c) }, callback))
 }
 
-fun <T> Actionable<T>.textMessage(chatId: Long, text: String, callback: SentCallback<Message> = DefaultMessageSentCallback()) = textMessage(chatId.toString(), text, callback)
-
-fun <T> Actionable<T>.textMessage(chatId: String, text: String, callback: SentCallback<Message> = DefaultMessageSentCallback()) {
-    this.act(ApiTelegramCommandAndCallback(SendMessage(chatId, text), { b, c -> executeAsync(b, c) }, callback))
+fun <T> Actionable<T>.textMessage(text: String, callback: SentCallback<Message> = DefaultMessageSentCallback()) {
+    this.act(ApiTelegramCommandAndCallback(SendMessage(this.session.chatId, text), { b, c -> executeAsync(b, c) }, callback))
 }
 
-fun <T> Actionable<T>.keyboard(chatId: Long, keyBoard: ReplyKeyboardMarkup, callback: SentCallback<Message> = DefaultMessageSentCallback()) {
-    keyboardInternal(chatId, keyBoard, callback).forEach { this.act(it) }
+fun <T> Actionable<T>.keyboard(keyBoard: ReplyKeyboardMarkup, callback: SentCallback<Message> = DefaultMessageSentCallback()) {
+    keyboardInternal(this.session.chatId, keyBoard, callback).forEach { this.act(it) }
 }
 
 internal fun keyboardInternal(chatId: Long, keyBoard: ReplyKeyboardMarkup, callback: SentCallback<Message> = DefaultMessageSentCallback()): List<TelegramCommand> {
@@ -38,9 +36,9 @@ internal fun keyboardInternal(chatId: Long, keyBoard: ReplyKeyboardMarkup, callb
     }, { b, c -> executeAsync(b, c) }, callback))
 }
 
-fun <T> Actionable<T>.documentMessage(chatId: Long, documentName: String, ba: ByteArray) {
+fun <T> Actionable<T>.documentMessage(documentName: String, ba: ByteArray) {
     this.act(PartialApiTelegramCommandAndCallback<SendDocument>(SendDocument().apply {
-        this.chatId = chatId.toString()
+        this.chatId = this@documentMessage.session.chatId.toString()
         this.setNewDocument(documentName, ByteArrayInputStream(ba))
     }) { b -> sendDocument(b) })
 }

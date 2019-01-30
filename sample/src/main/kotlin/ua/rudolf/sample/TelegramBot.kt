@@ -5,6 +5,8 @@ import org.telegram.telegrambots.api.objects.Update
 import ua.rudolf.sample.dao.Location
 import ua.rudolf.sample.dao.UserSession
 import ua.rudolf.sample.dao.UserState
+import ua.rudolf.telega.menu.PollingBot
+import ua.rudolf.telega.menu.TelegramBotConfig
 import ua.rudolf.telega.menu.bottom.Actionable
 import ua.rudolf.telega.menu.bottom.Menu
 import ua.rudolf.telega.menu.bottom.documentMessage
@@ -14,10 +16,10 @@ import ua.rudolf.telega.menu.extractMessage
 
 fun Actionable<UserSession>.appLocationHandler(message: Message, location: org.telegram.telegrambots.api.objects.Location) {
     if (user.state == UserState.TERMINATED) {
-        textMessage(user.chatId.toString(), "User terminated")
+        textMessage("User terminated")
     } else {
         user.lastLocation = Location.new(message, location)
-        locationMessage(user.chatId, location.longitude, location.latitude)
+        locationMessage(location.longitude, location.latitude)
     }
 }
 
@@ -38,17 +40,17 @@ class TelegramBot(config: TelegramBotConfig) {
             UserState.values().forEach {
                 action(it.name) {
                     user.state = it
-                    textMessage(user.chatId, "User state changed to $it")
+                    textMessage("User state changed to $it")
                 }
             }
         }
         action("Show last location") {
             val loc = user.lastLocation
             if (loc != null) {
-                locationMessage(user.chatId, loc.longitude, loc.latitude)
+                locationMessage(loc.longitude, loc.latitude)
             } else {
-                textMessage(user.chatId, "Last location not defined")
-                documentMessage(user.chatId, "read_it.txt", "Hi Looser".toByteArray())
+                textMessage("Last location not defined")
+                documentMessage("read_it.txt", "Hi Looser".toByteArray())
             }
         }
     }

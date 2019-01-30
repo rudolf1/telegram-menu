@@ -12,6 +12,7 @@ typealias ActionableGenerator<T> = Actionable<T>.() -> Unit
 interface Actionable<T> {
     fun act(command: TelegramCommand)
     val user: T
+    val session: Session<T>
 }
 
 class TmpMenu<T>(val origin: MenuPoint<T>, val user: T) {

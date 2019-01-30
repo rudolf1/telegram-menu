@@ -3,7 +3,7 @@ package ua.rudolf.telega.menu.bottom
 import org.telegram.telegrambots.api.objects.Update
 import ua.rudolf.telega.menu.extractMessage
 
-class Session<T>(val userSession: T, val menu: Menu<T>) {
+class Session<T>(val chatId: Long, val userSession: T, val menu: Menu<T>) {
 
     var currentMenu: MenuPoint<T>? = null
     var awaitingTextReply: String? = null
@@ -14,6 +14,9 @@ class Session<T>(val userSession: T, val menu: Menu<T>) {
 
         val result = ArrayList<TelegramCommand>()
         val x: Actionable<T> = object : Actionable<T> {
+            override val session: Session<T>
+                get() = this@Session
+
             override val user: T
                 get() = userSession
 
@@ -49,7 +52,7 @@ class Session<T>(val userSession: T, val menu: Menu<T>) {
         }
         if (result.isEmpty()) {
             with(x) {
-                textMessage(message.chatId, "Incorrect message, Please use menu.")
+                textMessage("Incorrect message, Please use menu.")
             }
         }
         return result

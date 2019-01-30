@@ -1,4 +1,4 @@
-package ua.rudolf.sample
+package ua.rudolf.telega.menu
 
 import org.apache.http.HttpHost
 import org.apache.http.auth.UsernamePasswordCredentials

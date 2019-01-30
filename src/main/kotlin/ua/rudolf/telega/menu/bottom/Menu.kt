@@ -30,7 +30,7 @@ class Menu<T>(
 
     fun process(update: Update): List<TelegramCommand> {
         val message = update.extractMessage()
-        val session = sessions.getOrPut(message.chatId, { Session(userSessionProvider.invoke(update), this) })
+        val session = sessions.getOrPut(message.chatId) { Session(message.chatId, userSessionProvider.invoke(update), this) }
         if (session.currentMenu == null) {
             return bottomKeyboard.sendToUser(session.userSession, message.chatId, { v -> session.currentMenu = v })
         }
