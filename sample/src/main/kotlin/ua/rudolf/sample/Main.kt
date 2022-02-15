@@ -15,7 +15,7 @@ val config = TelegramBotConfig(
         )
 )
 
-fun main(args: Array<String>) {
+fun main() {
     ApiContextInitializer.init()
     val telegramBotsApi = TelegramBotsApi()
 
